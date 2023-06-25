@@ -160,24 +160,31 @@
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
 
-        function startDrawing(e) {
-            isDrawing = true;
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-        }
+        canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchend', stopDrawing);
 
-        function draw(e) {
-            if (!isDrawing) return;
+function startDrawing(e) {
+  isDrawing = true;
+  [lastX, lastY] = [e.offsetX || e.touches[0].clientX, e.offsetY || e.touches[0].clientY];
+}
 
-            context.beginPath();
-            context.moveTo(lastX, lastY);
-            context.lineTo(e.offsetX, e.offsetY);
-            context.strokeStyle = currentColor;
-            context.lineWidth = 7;
-            context.lineCap = 'round';
-            context.stroke();
+function draw(e) {
+  if (!isDrawing) return;
 
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-        }
+  const x = e.offsetX || e.touches[0].clientX;
+  const y = e.offsetY || e.touches[0].clientY;
+
+  context.beginPath();
+  context.moveTo(lastX, lastY);
+  context.lineTo(x, y);
+  context.strokeStyle = currentColor;
+  context.lineWidth = 7;
+  context.lineCap = 'round';
+  context.stroke();
+
+  [lastX, lastY] = [x, y];
+}
 
         function stopDrawing() {
             isDrawing = false;
