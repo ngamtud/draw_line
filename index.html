@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background-color: white;
+        }
+
+        .row {
+            display: flex;
+         }
+
+        #button-area {
+            position: relative;
+            width: 800px; /* adjust width and height to match your preference */
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #drawing-area {
+            position: relative;
+            width: 800px; /* adjust width and height to match your preference */
+            height: 500px;
+            background-image: url('');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: 2px solid #422800;
+            border-radius: 30px;
+            margin-top: 20px;
+        }
+
+        #drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;        
+        }
+
+        .button-container {
+            position: absolute;
+            display: flex;
+            margin: auto;
+            width: 100%;
+            justify-content: space-between;
+            
+        }
+
+        .color-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .color-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        .color-button.selected {
+            border: 2px solid white !important;
+            box-shadow: 3px 3px rgb(206, 206, 206);
+        }
+
+        .erase-button {
+            background-color: #fbeee0;
+            border: 2px solid #422800;
+            border-radius: 30px;
+            box-shadow: #422800 4px 4px 0 0;
+            color: #422800;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 18px;
+            padding: 0 18px;
+            line-height: 50px;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            margin-right: 30px;
+        }
+
+        .reset-button {
+            background-color: #fbeee0;
+            border: 2px solid #422800;
+            border-radius: 30px;
+            box-shadow: #422800 4px 4px 0 0;
+            color: #422800;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 18px;
+            padding: 0 18px;
+            line-height: 50px;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="row">
+            <div id="button-area">
+                <div class="button-container">
+                    <div class="color-buttons">
+                        <div class="color-button" data-color="rgb(228, 45, 45)" style="background-color: rgb(228, 45, 45);"></div>
+                        <div class="color-button" data-color="rgb(57, 116, 193)" style="background-color: rgb(57, 116, 193);"></div>
+                        <div class="color-button" data-color="black" style="background-color: black;"></div>
+                    </div>
+                    <div>
+                        <button class="erase-button">Erase</button>
+                        <button class="reset-button">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div id="drawing-area">
+                <canvas id="drawing-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the canvas element and its context
+        const canvas = document.getElementById('drawing-canvas');
+        const context = canvas.getContext('2d');
+
+        // Set initial line color
+        let currentColor = 'black';
+
+        // Set canvas size
+        canvas.width = 800; /* adjust to match your preference */
+        canvas.height = 500;
+
+        // Set up event listeners for drawing
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            context.beginPath();
+            context.moveTo(lastX, lastY);
+            context.lineTo(e.offsetX, e.offsetY);
+            context.strokeStyle = currentColor;
+            context.lineWidth = 7;
+            context.lineCap = 'round';
+            context.stroke();
+
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // Clear the canvas
+        const eraseButton = document.querySelector('.erase-button');
+        eraseButton.addEventListener('click', function() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        const colorButtons = document.querySelectorAll('.color-button');
+        colorButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                currentColor = button.dataset.color;
+
+                // Remove 'selected' class from all color buttons
+                colorButtons.forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+
+                // Add 'selected' class to the clicked color button
+                button.classList.add('selected');
+            });
+        });
+
+// ...
+
+// Set the default selection on the black color button
+const defaultColorButton = document.querySelector('.color-button[data-color="black"]');
+defaultColorButton.classList.add('selected');
+const defaultColor = defaultColorButton.dataset.color;
+context.strokeStyle = defaultColor;
+
+const resetButton = document.querySelector('.reset-button');
+const imageUrls = [
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833959.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833961.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833962.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833963.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833964.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833965.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833966.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833967.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833968.jpg',
+    'https://raw.githubusercontent.com/ngamtud/draw_line/main/image/S__3833969.jpg',
+];
+let previousImageIndex = -1;
+
+function getRandomImageIndex() {
+    let index = Math.floor(Math.random() * imageUrls.length);
+    if (index === previousImageIndex) {
+        return getRandomImageIndex();
+    }
+    return index;
+}
+
+// Function to change the image
+function changeImage() {
+    // Change the image randomly
+    const randomImageIndex = getRandomImageIndex();
+    const imageUrl = imageUrls[randomImageIndex];
+    document.getElementById('drawing-area').style.backgroundImage = `url('${imageUrl}')`;
+
+    // Store the current image index as the previous index
+    previousImageIndex = randomImageIndex;
+}
+
+// Call the changeImage function on page load
+changeImage();
+
+resetButton.addEventListener('click', function() {
+    // Clear the canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Call the changeImage function to change the image
+    changeImage();
+});
+
+// ...
+        resetButton.addEventListener('click', function() {
+            // Clear the canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Change the image randomly
+            const randomImageIndex = getRandomImageIndex();
+            const imageUrl = imageUrls[randomImageIndex];
+            document.getElementById('drawing-area').style.backgroundImage = `url('${imageUrl}')`;
+
+            // Store the current image index as the previous index
+            previousImageIndex = randomImageIndex;
+        });
+
+    </script>
+</body>
+</html>
